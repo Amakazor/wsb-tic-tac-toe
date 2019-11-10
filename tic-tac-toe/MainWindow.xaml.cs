@@ -23,9 +23,14 @@ namespace tic_tac_toe
     {
         bool current_turn = true;
 
+        bool game_won = false;
+        bool game_draw = false;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            Reset();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -33,24 +38,24 @@ namespace tic_tac_toe
             Button button = sender as Button;
             Grid mygrid = myGrid;
             int rowIndex = Grid.GetRow(button);
-            TextBlock title = titlebar;
 
-            if (button.Background != Brushes.Red as Brush && button.Background != Brushes.Green as Brush)
+            if (!game_won && !game_draw)
             {
-                if (current_turn)
+                if (button.Background != Brushes.Red as Brush && button.Background != Brushes.Green as Brush)
                 {
-                    button.Background = Brushes.Red as Brush;
-                }
-                else
-                {
-                    button.Background = Brushes.Green as Brush;
-                }
+                    if (current_turn)
+                    {
+                        button.Background = Brushes.Red as Brush;
+                    }
+                    else
+                    {
+                        button.Background = Brushes.Green as Brush;
+                    }
 
-                current_turn = !current_turn;
-
-                if (Check_For_Win())
-                {
-                    title.Text = "XD";
+                    if (Check_For_Win()) game_won = true;
+                    if (!game_won && Check_For_Full()) game_draw = true;
+                    if (!game_won && !game_draw) current_turn = !current_turn;
+                    else Game_End();
                 }
             }
         }
@@ -111,6 +116,75 @@ namespace tic_tac_toe
                 }
             }
             return false;
+        }
+
+        private bool Check_For_Full()
+        {
+            Grid mygrid = myGrid;
+
+            UIElementCollection children = mygrid.Children;
+
+            for (int i = 0; i < children.Count; i++)
+            {
+                var child = children[i];
+                Button button = child as Button;
+
+                if (button != null)
+                {
+                    Brush color = button.Background;
+
+                    if (color != Brushes.Red as Brush && color != Brushes.Green as Brush)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        private void Game_End()
+        {
+            TextBlock title = titlebar;
+
+            if (game_won)
+            {
+                if (current_turn) titlebar.Text = "Red won!";
+                else titlebar.Text = "Green won!";
+            }
+            else if (game_draw)
+            {
+                titlebar.Text = "Draw!";
+            }
+        }
+
+        private void Reset()
+        {
+            current_turn = true;
+            game_won = false;
+            game_draw = false;
+
+            Grid mygrid = myGrid;
+
+            UIElementCollection children = mygrid.Children;
+
+            for (int i = 0; i < children.Count; i++)
+            {
+                var child = children[i];
+                Button button = child as Button;
+
+                if (button != null)
+                {
+                    button.Background = Brushes.White as Brush;
+                }
+            }
+
+            TextBlock title = titlebar;
+            titlebar.Text = "";
+        }
+
+        private void reset_Click(object sender, RoutedEventArgs e)
+        {
+            Reset();
         }
     }
 }
